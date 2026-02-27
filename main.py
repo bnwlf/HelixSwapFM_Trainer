@@ -24,7 +24,7 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 from composer import Evaluator, Trainer, algorithms
 from composer.callbacks import LRMonitor, MemoryMonitor, OptimizerMonitor, RuntimeEstimator, SpeedMonitor
 from composer.core import DataSpec
-from composer.loggers import WandBLogger
+from composer.loggers import WandBLogger, CSVLogger
 from composer.optim import DecoupledAdamW
 from composer.optim.scheduler import (
     ConstantWithWarmupScheduler,
@@ -122,6 +122,7 @@ def log_config(cfg: DictConfig):
         if wandb.run:
             wandb.config.update(om.to_container(cfg, resolve=True))
 
+
 # adapted by Josefine Busch
 def build_algorithm(name, kwargs):
     if name == "gradient_clipping":
@@ -185,8 +186,16 @@ def build_callback(name, kwargs):
 def build_logger(name, kwargs):
     if name == "wandb":
         return WandBLogger(**kwargs)
+
+    elif name == "csv":
+        return CSVLogger(filename=kwargs)
+    elif name == "csv_train":
+        return CSVLogger(filename=kwargs)
+    elif name == "csv_eval":
+        return CSVLogger(filename=kwargs)
     else:
         raise ValueError(f"Not sure how to build logger: {name}")
+
 
 
 def build_scheduler(cfg):
@@ -510,7 +519,9 @@ def main(cfg: DictConfig, return_trainer: bool = False, do_train: bool = True) -
 
 if __name__ == "__main__":
     yaml_path, args_list = sys.argv[1], sys.argv[2:]
-    with open("yamls/defaults.yaml") as f:
+    main_path = BASE_DIR = Path(__file__).resolve().parent.parent
+
+    with open(main_path / "yamls"/ "defaults.yaml") as f:
         default_cfg = om.load(f)
     with open(yaml_path) as f:
         yaml_cfg = om.load(f)
