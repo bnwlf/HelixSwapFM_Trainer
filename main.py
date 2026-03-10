@@ -57,6 +57,7 @@ class EvalCSVLogger(Callback):
         self.filename = filename
         self.file = open(self.filename, "w", newline="")
         self.writer = None
+        print("EvalCSVLogger:", filename)
 
     def eval_end(self, state, logger):
         metrics = {}
@@ -72,7 +73,10 @@ class EvalCSVLogger(Callback):
         if self.writer is None:
             self.writer = csv.DictWriter(self.file, fieldnames=metrics.keys())
             self.writer.writeheader()
-
+        print("_______EVAL BEGIN____")
+        print(metrics)
+        print(state.eval_metrics)
+        print("_______EVAL END____")
         self.writer.writerow(metrics)
         self.file.flush()
 
@@ -218,7 +222,7 @@ def build_logger(name, kwargs):
     if name == "wandb":
         return WandBLogger(**kwargs)
 
-    elif name == "csv":
+    elif name == "csv_eval":
         return EvalCSVLogger(filename=kwargs)
     else:
         raise ValueError(f"Not sure how to build logger: {name}")
@@ -452,10 +456,10 @@ def main(cfg: DictConfig, return_trainer: bool = False, do_train: bool = True) -
     scheduler = build_scheduler(cfg.scheduler)
 
     # Loggers
-    loggers = [build_logger(name, logger_cfg) for name, logger_cfg in cfg.get("loggers", {}).items()]
+    loggers = [build_logger(name, logger_cfg) for name, logger_cfg in cfg.get("loggers", {}).items()]+ [EvalCSVLogger("/home/ben/HelixSwapFM_fork/foo.txt")]
 
     # Callbacks
-    callbacks = [build_callback(name, callback_cfg) for name, callback_cfg in cfg.get("callbacks", {}).items()]
+    callbacks = [build_callback(name, callback_cfg) for name, callback_cfg in cfg.get("callbacks", {}).items()]+ [EvalCSVLogger("/home/ben/HelixSwapFM_fork/foo2.txt")]
 
     # Algorithms
     if (
