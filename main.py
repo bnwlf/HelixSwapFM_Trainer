@@ -54,6 +54,7 @@ from src.sequence_packer import get_num_samples_in_packed_batch, split_packed_ba
 class EvalCSVLogger(Callback):
 
     def __init__(self, filename="eval_metrics.csv"):
+        print("FOOOOOOOOOOOOOOO___________")
         self.filename = filename
         self.file = open(self.filename, "w", newline="")
         self.writer = None
@@ -511,6 +512,10 @@ def main(cfg: DictConfig, return_trainer: bool = False, do_train: bool = True) -
 
     print("Logging config...")
     log_config(cfg)
+
+    print("Callback")
+    print(trainer.state.callbacks)
+
 
     if do_train:
         print("Starting training...")
