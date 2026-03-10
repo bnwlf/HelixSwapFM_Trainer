@@ -24,7 +24,7 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from composer import Evaluator, Trainer, algorithms
 from composer.callbacks import LRMonitor, MemoryMonitor, OptimizerMonitor, RuntimeEstimator, SpeedMonitor
-from composer.core import DataSpec
+from composer.core import DataSpec, Callback
 from composer.loggers import WandBLogger
 from composer.optim import DecoupledAdamW
 from composer.optim.scheduler import (
