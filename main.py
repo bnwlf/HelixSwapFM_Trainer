@@ -9,6 +9,7 @@
 import os
 import sys
 import warnings
+import csv
 from pathlib import Path
 from typing import Optional, cast
 
@@ -24,7 +25,7 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 from composer import Evaluator, Trainer, algorithms
 from composer.callbacks import LRMonitor, MemoryMonitor, OptimizerMonitor, RuntimeEstimator, SpeedMonitor
 from composer.core import DataSpec
-from composer.loggers import WandBLogger, CSVLogger
+from composer.loggers import WandBLogger
 from composer.optim import DecoupledAdamW
 from composer.optim.scheduler import (
     ConstantWithWarmupScheduler,
@@ -48,6 +49,36 @@ from src.callbacks.packing_efficiency import PackingEfficency
 from src.callbacks.scheduled_gc import ScheduledGarbageCollector
 from src.scheduler import CosineInverseSqrtScheduler, OneMinusSqrtScheduler, WarmupStableDecayScheduler
 from src.sequence_packer import get_num_samples_in_packed_batch, split_packed_batch
+
+
+class EvalCSVLogger(Callback):
+
+    def __init__(self, filename="eval_metrics.csv"):
+        self.filename = filename
+        self.file = open(self.filename, "w", newline="")
+        self.writer = None
+
+    def eval_end(self, state, logger):
+        metrics = {}
+
+        for name, metric in state.eval_metrics.items():
+            metrics[name] = metric.compute().item()
+
+        step = state.timestamp.batch.value
+        metrics["step"] = step
+        metrics["epoch"] = state.timestamp.epoch.value
+
+        # Header einmal schreiben
+        if self.writer is None:
+            self.writer = csv.DictWriter(self.file, fieldnames=metrics.keys())
+            self.writer.writeheader()
+
+        self.writer.writerow(metrics)
+        self.file.flush()
+
+
+
+
 
 
 def update_batch_size_info(cfg: DictConfig):
@@ -188,11 +219,7 @@ def build_logger(name, kwargs):
         return WandBLogger(**kwargs)
 
     elif name == "csv":
-        return CSVLogger(filename=kwargs)
-    elif name == "csv_train":
-        return CSVLogger(filename=kwargs)
-    elif name == "csv_eval":
-        return CSVLogger(filename=kwargs)
+        return EvalCSVLogger(filename=kwargs)
     else:
         raise ValueError(f"Not sure how to build logger: {name}")
 
