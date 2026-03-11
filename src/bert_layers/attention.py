@@ -410,7 +410,7 @@ class FlexBertUnpadAttention(FlexBertAttentionBase):
                     deterministic=self.deterministic_fa2,
                     window_size=self.sliding_window,
                 )
-            attn = attn.view(bs, dim)
+            attn = attn.reshape(bs, dim)
         else:
             qkv = bert_padding.pad_input(qkv, indices, cu_seqlens.shape[0] - 1, max_seqlen)  # batch, max_seqlen, thd
             unpad_bs, seqlen, _ = qkv.shape
@@ -560,7 +560,7 @@ class FlexBertUnpadParallelAttention(FlexBertAttentionBase):
                     deterministic=self.deterministic_fa2,
                     window_size=self.sliding_window,
                 )
-            attn = attn.view(bs, dim)
+            attn = attn.reshape(bs, dim)
         else:
             qkv = bert_padding.pad_input(qkv, indices, cu_seqlens.shape[0] - 1, max_seqlen)  # batch, max_seqlen, thd
             unpad_bs, seqlen, _ = qkv.shape
@@ -579,7 +579,7 @@ class FlexBertUnpadParallelAttention(FlexBertAttentionBase):
             attn = attn.transpose(1, 2).view(unpad_bs, -1, dim)  # b s h d
             attn = bert_padding.unpad_input_only(attn, torch.squeeze(attn_mask) == 1)
 
-        return self.out_drop(self.Wo(attn.view(bs, dim)))
+        return self.out_drop(self.Wo(attn.reshape(bs, dim)))
 
 
 class FlexBertPaddedAttention(FlexBertAttentionBase):
@@ -707,7 +707,7 @@ class FlexBertPaddedAttention(FlexBertAttentionBase):
                 else None,
             ).transpose(1, 2)
 
-        attn = attn.view(bs, seqlen, dim)
+        attn = attn..eshape(bs, seqlen, dim)
         return self.out_drop(self.Wo(attn))
 
 
@@ -881,7 +881,7 @@ class FlexBertUnpadRopeAttention(FlexBertAttentionBase):
                     max_seqlen_k=max_seqlen,
                     deterministic=self.deterministic_fa2,
                 )
-            attn = attn.view(bs, dim)
+            attn = attn.reshape(bs, dim)
         elif self.use_fa2:
             convert_dtype = qkv.dtype not in (torch.float16, torch.bfloat16)
             if convert_dtype:
@@ -908,7 +908,7 @@ class FlexBertUnpadRopeAttention(FlexBertAttentionBase):
                     deterministic=self.deterministic_fa2,
                     window_size=self.sliding_window,
                 )
-            attn = attn.view(bs, dim)
+            attn = attn.reshape(bs, dim)
         else:
             qkv = bert_padding.pad_input(
                 qkv, indices, cu_seqlens.shape[0] - 1, attn_mask.shape[-1]
@@ -1081,7 +1081,7 @@ class FlexBertPaddedRopeAttention(FlexBertAttentionBase):
                 else None,
             ).transpose(1, 2)
 
-        attn = attn.view(bs, seqlen, dim)
+        attn = attn.reshape(bs, seqlen, dim)
         return self.out_drop(self.Wo(attn))
 
 
@@ -1239,7 +1239,7 @@ class FlexBertUnpadRopeParallelAttention(FlexBertAttentionBase):
                     deterministic=self.deterministic_fa2,
                     window_size=self.sliding_window,
                 )
-            attn = attn.view(bs, dim)
+            attn = attn.reshape(bs, dim)
         else:
             qkv = bert_padding.pad_input(
                 qkv, indices, cu_seqlens.shape[0] - 1, attn_mask.shape[-1]
@@ -1406,7 +1406,7 @@ class FlexBertPaddedRopeParallelAttention(FlexBertAttentionBase):
                 else None,
             ).transpose(1, 2)
 
-        attn = attn.view(bs, seqlen, dim)
+        attn = attn.reshape(bs, seqlen, dim)
         return self.out_drop(self.Wo(attn))
 
 
@@ -1526,7 +1526,7 @@ class FlexBertPaddedParallelAttention(FlexBertAttentionBase):
                 else None,
             ).transpose(1, 2)
 
-        attn = attn.view(bs, seqlen, dim)
+        attn = attn.reshape(bs, seqlen, dim)
         return self.out_drop(self.Wo(attn))
 
 
