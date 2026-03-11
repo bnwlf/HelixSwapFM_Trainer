@@ -505,7 +505,7 @@ def main(cfg: DictConfig, return_trainer: bool = False, do_train: bool = True) -
 
 if __name__ == "__main__":
     yaml_path, args_list = sys.argv[1], sys.argv[2:]
-    main_path = BASE_DIR = Path(__file__).resolve().parent.parent
+    main_path = BASE_DIR = Path(__file__).resolve().parent
 
     with open(main_path / "yamls"/ "defaults.yaml") as f:
         default_cfg = om.load(f)
