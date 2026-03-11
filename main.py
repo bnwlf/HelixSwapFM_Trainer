@@ -30,6 +30,7 @@ from omegaconf import DictConfig, OmegaConf
 from omegaconf import OmegaConf as om
 from torch.optim import AdamW
 
+from src.CSVLogger import CSVLogger
 import src.flex_bert as flex_bert_module
 import src.hf_bert as hf_bert_module
 import src.mosaic_bert as mosaic_bert_module
@@ -179,6 +180,12 @@ def build_callback(name, kwargs):
 def build_logger(name, kwargs):
     if name == "wandb":
         return WandBLogger(**kwargs)
+
+    if name == "CSVLogger":
+        prefix = Path(kwargs)
+        print("CSVLogger -> logging to ", prefix)
+        return CSVLogger(prefix / "train.log", prefix / "eval.log")
+
     else:
         raise ValueError(f"Not sure how to build logger: {name}")
 
