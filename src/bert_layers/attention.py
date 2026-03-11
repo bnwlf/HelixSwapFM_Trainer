@@ -173,7 +173,7 @@ class BertAlibiUnpadSelfAttention(nn.Module):
 
             attention = bert_padding.unpad_input_only(attention, torch.squeeze(attn_mask) == 1)
 
-        return attention.view(bs, dim)
+        return attention.reshape(bs, dim)
 
 
 # Copy of transformer's library BertSelfOutput that will not be caught by surgery methods looking for HF BERT modules.
