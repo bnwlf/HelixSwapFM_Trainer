@@ -458,7 +458,7 @@ def main(cfg: DictConfig, return_trainer: bool = False, do_train: bool = True) -
     scheduler = build_scheduler(cfg.scheduler)
 
     # Loggers
-    loggers = [build_logger(name, logger_cfg) for name, logger_cfg in cfg.get("loggers", {}).items() if name "csv_eval"]
+    loggers = [build_logger(name, logger_cfg) for name, logger_cfg in cfg.get("loggers", {}).items() if name != "csv_eval"]
 
     # Callbacks
     callbacks = [build_callback(name, callback_cfg) for name, callback_cfg in cfg.get("callbacks", {}).items()]+ [EvalCSVLogger("/home/ben/HelixSwapFM_fork/foo2.txt")]
