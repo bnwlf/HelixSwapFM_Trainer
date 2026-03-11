@@ -1,15 +1,7 @@
-# This file has been modified by Josefine Busch
-
-# Copyright 2024 onwards Answer.AI, LightOn, and contributors
-# License: Apache-2.0
-
-# Copyright 2022 MosaicML Examples authors
-# SPDX-License-Identifier: Apache-2.0
 
 import os
 import sys
 import warnings
-import csv
 from pathlib import Path
 from typing import Optional, cast
 
@@ -423,6 +415,7 @@ def main(cfg: DictConfig, return_trainer: bool = False, do_train: bool = True) -
 
     # Callbacks
     callbacks = [build_callback(name, callback_cfg) for name, callback_cfg in cfg.get("callbacks", {}).items()]
+
     # Algorithms
     if (
         cfg.get("algorithms", {}).get("gradient_clipping", {}).get("clipping_threshold", 0) > 0
@@ -474,10 +467,6 @@ def main(cfg: DictConfig, return_trainer: bool = False, do_train: bool = True) -
     print("Logging config...")
     log_config(cfg)
 
-    print("Callback")
-    print(trainer.state.callbacks)
-
-
     if do_train:
         print("Starting training...")
         # this section is intended to use when resuming from a checkpoint where one wants to change
@@ -516,7 +505,7 @@ def main(cfg: DictConfig, return_trainer: bool = False, do_train: bool = True) -
 
 if __name__ == "__main__":
     yaml_path, args_list = sys.argv[1], sys.argv[2:]
-    main_path = Path(__file__).resolve().parent
+    main_path = BASE_DIR = Path(__file__).resolve().parent.parent
 
     with open(main_path / "yamls"/ "defaults.yaml") as f:
         default_cfg = om.load(f)
