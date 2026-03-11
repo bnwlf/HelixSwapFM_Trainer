@@ -224,6 +224,7 @@ def build_logger(name, kwargs):
         return WandBLogger(**kwargs)
 
     elif name == "csv_eval":
+        pass
         #return EvalCSVLogger(filename=kwargs)
     else:
         raise ValueError(f"Not sure how to build logger: {name}")
