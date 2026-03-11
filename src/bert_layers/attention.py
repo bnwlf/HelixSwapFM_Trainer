@@ -707,7 +707,7 @@ class FlexBertPaddedAttention(FlexBertAttentionBase):
                 else None,
             ).transpose(1, 2)
 
-        attn = attn..eshape(bs, seqlen, dim)
+        attn = attn.reshape(bs, seqlen, dim)
         return self.out_drop(self.Wo(attn))
 
 
