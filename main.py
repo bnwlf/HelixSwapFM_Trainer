@@ -24,7 +24,7 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from composer import Evaluator, Trainer, algorithms
 from composer.callbacks import LRMonitor, MemoryMonitor, OptimizerMonitor, RuntimeEstimator, SpeedMonitor
-from composer.core import DataSpec, Callback
+from composer.core import DataSpec
 from composer.loggers import WandBLogger
 from composer.optim import DecoupledAdamW
 from composer.optim.scheduler import (
@@ -49,41 +49,6 @@ from src.callbacks.packing_efficiency import PackingEfficency
 from src.callbacks.scheduled_gc import ScheduledGarbageCollector
 from src.scheduler import CosineInverseSqrtScheduler, OneMinusSqrtScheduler, WarmupStableDecayScheduler
 from src.sequence_packer import get_num_samples_in_packed_batch, split_packed_batch
-
-
-class EvalCSVLogger(Callback):
-
-    def __init__(self, filename="eval_metrics.csv"):
-
-        self.filename = filename
-        self.file = open(self.filename, "w", newline="")
-        self.writer = None
-
-
-    def eval_end(self, state, logger):
-        metrics = {}
-
-        for name, metric in state.eval_metrics.items():
-            metrics[name] = metric.compute().item()
-
-        step = state.timestamp.batch.value
-        metrics["step"] = step
-        metrics["epoch"] = state.timestamp.epoch.value
-
-        # Header einmal schreiben
-        if self.writer is None:
-            self.writer = csv.DictWriter(self.file, fieldnames=metrics.keys())
-            self.writer.writeheader()
-
-        print(metrics)
-        print(state.eval_metrics)
-
-        self.writer.writerow(metrics)
-        self.file.flush()
-
-
-
-
 
 
 def update_batch_size_info(cfg: DictConfig):
@@ -222,10 +187,6 @@ def build_callback(name, kwargs):
 def build_logger(name, kwargs):
     if name == "wandb":
         return WandBLogger(**kwargs)
-
-    elif name == "csv_eval":
-        pass
-        #return EvalCSVLogger(filename=kwargs)
     else:
         raise ValueError(f"Not sure how to build logger: {name}")
 
@@ -458,11 +419,10 @@ def main(cfg: DictConfig, return_trainer: bool = False, do_train: bool = True) -
     scheduler = build_scheduler(cfg.scheduler)
 
     # Loggers
-    loggers = [build_logger(name, logger_cfg) for name, logger_cfg in cfg.get("loggers", {}).items() if name != "csv_eval"]
+    loggers = [build_logger(name, logger_cfg) for name, logger_cfg in cfg.get("loggers", {}).items()]
 
     # Callbacks
-    callbacks = [build_callback(name, callback_cfg) for name, callback_cfg in cfg.get("callbacks", {}).items()]+ [EvalCSVLogger("/home/ben/HelixSwapFM_fork/foo2.txt")]
-
+    callbacks = [build_callback(name, callback_cfg) for name, callback_cfg in cfg.get("callbacks", {}).items()]
     # Algorithms
     if (
         cfg.get("algorithms", {}).get("gradient_clipping", {}).get("clipping_threshold", 0) > 0
