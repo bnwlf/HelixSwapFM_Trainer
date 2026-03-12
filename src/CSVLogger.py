@@ -64,7 +64,10 @@ class CSVLogger(LoggerDestination):
     def log_hyperparameters(self, hyperparameters: dict):
         pass
 
-    def close(self):
-        print("CSVLOGGER_close")
+    def close(self, *args, **kwargs):
+
+        #Force write last elem
+        self.log_metrics({},self.__current_logelem__.step +1)
         self.train_file.close()
         self.eval_file.close()
+        print("CSVLogger closed!")
