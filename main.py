@@ -307,6 +307,8 @@ def build_dataloader(
     return data_loader
 
 def build_model(cfg: DictConfig):
+    # This hack prevent's the usage of Tokenizer in checkpoint writing!
+    cfg.tokenizer_name = None
     if cfg.name == "hf_bert":
         return hf_bert_module.create_hf_bert_mlm(
             pretrained_model_name=cfg.pretrained_model_name,
